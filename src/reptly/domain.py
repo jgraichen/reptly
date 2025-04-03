@@ -318,7 +318,7 @@ class Publish:
             return
 
         self.aptly.switch(self.distribution, self.target, wanted.new.name)
-        if re.match(".*+r[0-9]+$", wanted.old):
+        if re.match(".*\\+r[0-9]+$", wanted.old):
             self.aptly.snapshot_drop(wanted.old, check=False)
 
     def _publish_components(self, publishedSnapshots):
