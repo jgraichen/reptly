@@ -1,23 +1,20 @@
-Reptly: reprepro like usage of aptly 
-====================================
+# Reptly: reprepro like usage of aptly
 
-[Aptly](https://aptly.info) is a powerful tool to manage and publish [Debian Packages (DEB)](https://wiki.debian.org/deb). Sadly it isn't easy to use. It is a toolkit and allows almost all workflows and usecases. Common workflows like update everything and publish the result require multiple steps.
+[Aptly](https://aptly.info) is a powerful tool to manage and publish [Debian Packages (DEB)](https://wiki.debian.org/deb). Sadly it isn't easy to use. It is a toolkit and allows almost all workflows and use cases. Common workflows like update everything and publish the result require multiple steps.
 This projects (**reptly**) provides a wrapper around Aptly to describe simply workflows as configuration file and execute them with a simple command.
 The tool is to combine Reprepro's easy to use commands like update, with the features of Aptly.
 
-**Reptly** is primarily designed for humans to make their repo management easier. Integration into tools should probably use aptly directly as they already use scripts/automatication.
-
+**Reptly** is primarily designed for humans to make their repo management easier. Integration into tools should probably use aptly directly as they already use scripts/automation.
 
 ## Goals
 
-* Built up-on Aptly's snaphots (take snapshots of mirrors and repos)
+* Built up-on Aptly's snapshots (take snapshots of mirrors and repos)
 * To not limit configuration abouts around mirrors, repos, snapshots
 * Easily manage snapshot merges (combine different repos / mirrors): a simple command should be enough
 * Interactive update approval / rollback
 * Document / persist which publication targets exists and which software they should contain
 * Easily downgrade specific updates or delay updates (one major update of a specific software)
-* Notifications (e.g. cron) to information about new available updates
-
+* Notifications (e.g. `cron`) to information about new available updates
 
 ## Example
 
@@ -76,10 +73,7 @@ publish:  # list of different publications
 
 The scripts both execute the aptly binary (primarily for `mirror update`) to get feedback about what happens for longer operations. It also calls the Aptly API as it provides information not available or difficult to parse with aptly commands itself.
 
-For now it does not start the API itself. Although this is planed in the feature.
-
-The script is implemented in Python. The goal is to limit dependencies to a absolute minimum. It still uses `yaml` as configuration file and may use `prompt_toolkit` for easy to use CLI questions.
-
+For now, it does not start the API itself.
 
 ## Usage
 
@@ -91,31 +85,25 @@ Use the normal command to created, edit mirrors and repos. Afterwards you can re
 
 ### Check for updates
 
-Call `reptly update` to download new available updates from mirrors (`aptly mirror update`). Repos are currently not updated but a new snapshot is created if they have changed. Automatic `repo include` call should be added later one.
+Call `reptly update` to download new available updates from mirrors (`aptly mirror update`). Repos are currently not updated, but a new snapshot is created if they have changed. Automatic `repo include` call should be added later one.
 
 ### Publishing changes
 
 Run `reptly publish`. It will ask you change changes are available and whether you want to publish them.
 
-### Shorthands
+### Shortcuts
 
-`reptly run` is a shorthand for `reptly update` and `reptly pubish`.
+`reptly run` is a shortcut for `reptly update` and `reptly publish`.
 
-All commands take an optional filter to limit there operation. Use the internal `alias` identifier to operate on specific publish targets and their sources only. Wildcards matches ala `dev*` are supported, too. 
+All commands take an optional filter to limit there operation. Use the internal `alias` identifier to operate on specific publish targets and their sources only. Wildcard matches like `dev*` are supported, too.
 
 ## Update notifications
 
-`reptly --cron` provides a easy non-interactive mode to automatically check for updates. Output is only created on changes or errors.
+`reptly --cron` provides an easy non-interactive mode to automatically check for updates. Output is only created on changes or errors.
 
 Use `reptly --cron update` to download new changes from mirrors.
 
 Run `reptly --cron publish` to print available outstanding changes.
-
-
-## Testing
-
-There are no test at the moment. This should change at samepoint. The software interacts heavily with aptly so it is harder to write tests.
-
 
 ## Contributing
 
@@ -132,3 +120,4 @@ There are no test at the moment. This should change at samepoint. The software i
 LGPL License
 
 Copyright (c) 2018-2019, Malte Swart
+Copyright (c) 2020-2025, Jan Graichen
