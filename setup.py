@@ -1,6 +1,7 @@
-from setuptools import setup  # Always prefer setuptools over distutils
 from codecs import open  # To use a consistent encoding
 from os import path
+
+from setuptools import setup  # Always prefer setuptools over distutils
 
 here = path.abspath(path.dirname(__file__))
 
@@ -8,11 +9,9 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-from reptly import version
-
 setup(
     name='reptly',
-    version=version.STRING,
+    version='0.1.0',
 
     description='Reprepro inspired wrapper around aptly (simple but powerful apt repo management)',
     long_description=long_description,
@@ -56,7 +55,7 @@ setup(
     packages=['reptly'],
 
     install_requires=[
-        'prompt_toolkit',
+        'prompt_toolkit < 2.0',
         'pygments',
         'yaml',
     ],
