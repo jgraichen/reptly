@@ -22,6 +22,6 @@ case "$VERSION" in
 esac
 
 sudo install -m 755 aptly /usr/local/bin/aptly
-echo "PATH=\$PATH:/usr/local/bin" >> "$GITHUB_ENV"
+echo "PATH=${PATH}:/usr/local/bin" >> "${GITHUB_ENV}"
 
 aptly version
