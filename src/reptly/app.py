@@ -37,11 +37,13 @@ class App:
 
     def load(self, conf: typing.TextIO):
         data = yaml.load(conf, Loader=ConfigLoader)
+        if not data:
+            data = {}
 
         if data.get("keyring"):
             self.aptly.keyring = data["keyring"]
 
-        for pub in data["publish"]:
+        for pub in data.get("publish", []):
             prefix = pub.pop("destination")
             dist = pub.pop("distribution")
             self.publications.append(Publish(prefix, dist, pub))

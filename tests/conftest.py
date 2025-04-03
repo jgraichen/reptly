@@ -1,13 +1,6 @@
-import os
-import sys
 from typing import List, Optional
 
 import pytest
-
-parent = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-if os.path.isdir(os.path.join(parent, "reptly")):
-    sys.path.insert(0, parent)
-
 
 from reptly.app import App
 from reptly.domain import Mirror, Repo

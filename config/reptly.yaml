@@ -1,0 +1,30 @@
+---
+publish:
+  - alias: my-repo-noble
+    destination: my-repo
+    distribution: noble
+    origin: my-repo
+    components:
+      main: !snapshot.merge
+        name: my-repo-main-noble
+        sources:
+          - !mirror mirror-name-1
+          - !mirror mirror-name-2
+          - !repo repo-name-1
+          - !repo repo-name-2
+      another-component: !snapshot empty
+
+  - alias: my-repo-jammy
+    destination: my-repo
+    distribution: jammy
+    origin: my-repo
+    components:
+      main: !snapshot.merge
+        name: my-repo-main-jammy
+        sources:
+        sources:
+          - !mirror mirror-name-1
+          - !mirror mirror-name-2-jammy
+          - !repo repo-name-1
+          - !repo repo-name-2
+      another-component: !mirror nother-component-mirror-jammy

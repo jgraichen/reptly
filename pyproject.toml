@@ -1,0 +1,50 @@
+[project]
+name = "reptly"
+version = "0.1.0"
+description = "Reprepro inspired wrapper around aptly (simple but powerful apt repo management)"
+authors = [
+    {name = "Jan Graichen", email = "jgraichen@altimos.de"},
+    {name = "Malte Swart", email = "mswart@devtation.de"},
+]
+dependencies = [
+    "prompt_toolkit < 2.0",
+    "pygments",
+    "pyyaml",
+    "requests",
+]
+requires-python = ">= 3.10"
+readme = "README.md"
+license = {text = "LGPL"}
+keywords = [
+    "deb packages repo aptly reprepro",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: System :: Software Distribution",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+
+[dependency-groups]
+dev = [
+    "pytest~=8.3.5",
+    "ruff~=0.11.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/jgraichen/reptly"
+
+[project.scripts]
+reptly = "reptly.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
