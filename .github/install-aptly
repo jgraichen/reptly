@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -exo pipefail
+
+VERSION="$1"
+
+case "$VERSION" in
+"1.5.0")
+  wget --quiet -O aptly.tar.gz https://github.com/aptly-dev/aptly/releases/download/v1.5.0/aptly_1.5.0_linux_amd64.tar.gz
+  tar --extract --file aptly.tar.gz --strip-components=1 aptly_1.5.0_linux_amd64/aptly
+  ;;
+
+"1.6.1")
+  wget --quiet -O aptly.zip https://github.com/aptly-dev/aptly/releases/download/v1.6.1/aptly_1.6.1_linux_amd64.zip
+  sudo unzip -j aptly.zip aptly_1.6.1_linux_amd64/aptly
+  ;;
+
+*)
+  echo "Unsupported version: ${VERSION}" >&2
+  exit 1
+  ;;
+esac
+
+sudo install -m 755 aptly /usr/local/bin/aptly
+echo "PATH=\$PATH:/usr/local/bin" >> "$GITHUB_ENV"
+
+aptly version
