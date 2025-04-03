@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: uv sync --dev
-      - run: uv run pytest -- -vv
+      - run: uv run pytest -vv
 
   ruff-check:
     runs-on: ubuntu-24.04
