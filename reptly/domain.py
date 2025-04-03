@@ -1,22 +1,22 @@
 import collections
-from functools import partial
 import re
+from functools import partial
 
-Diff = collections.namedtuple('Diff', ('diff', 'old', 'new'))
+Diff = collections.namedtuple("Diff", ("diff", "old", "new"))
 
 
 def snapshot_sources(aptly, snapshot):
     sources = {}
     for type, name in aptly.snapshot_sources(snapshot):
-        if type != 'snapshot':
+        if type != "snapshot":
             continue
-        alias, rev = name.split('+r')
+        alias, rev = name.split("+r")
         sources[alias] = SnapshotContentMixin.Snapshot(name, int(rev))
     return sources
 
 
-class SnapshotContentMixin():
-    class Snapshot():
+class SnapshotContentMixin:
+    class Snapshot:
         def __init__(self, name, rev, *, temporary=False):
             self.name = name
             self.rev = rev
@@ -33,7 +33,7 @@ class SnapshotContentMixin():
             return self.name == other.name and self.rev == other.rev
 
         def __repr__(self):
-            return f'Snapshot({self.name}, {self.rev}, temporary={self.temporary})'
+            return f"Snapshot({self.name}, {self.rev}, temporary={self.temporary})"
 
     def publication_candidate(self, _published):
         return self.current
@@ -41,35 +41,28 @@ class SnapshotContentMixin():
     def _extract_own_snapshots(self):
         self.snapshots = []
         for s in self.aptly.snapshots:
-            if not s.startswith(self.name + '+r'):
+            if not s.startswith(self.name + "+r"):
                 continue
-            self.snapshots.append(self.Snapshot(s, int(s.split('+r')[1])))
-        self.snapshots = sorted(self.snapshots,
-                                key=lambda s: s.rev)
+            self.snapshots.append(self.Snapshot(s, int(s.split("+r")[1])))
+        self.snapshots = sorted(self.snapshots, key=lambda s: s.rev)
 
     @property
     def current(self):
-        return max(
-            self.snapshots,
-            key=lambda s: s.rev,
-            default=None
-        )
+        return max(self.snapshots, key=lambda s: s.rev, default=None)
 
     def _new_snapshot(self):
         current = self.current or self.Snapshot(None, 0)
         new = self.Snapshot(
-            f'{self.name}+r{current.rev + 1}',
-            current.rev + 1,
-            temporary=self.aptly
+            f"{self.name}+r{current.rev + 1}", current.rev + 1, temporary=self.aptly
         )
         return current, new
 
     def _snapshot_new(self, current, new):
-        ''' Check whether the newly created snapshot is
-            different from the current one.
-            New snapshot is dropped if there is not
-            changes.
-        '''
+        """Check whether the newly created snapshot is
+        different from the current one.
+        New snapshot is dropped if there is not
+        changes.
+        """
         # 3. compare for changes
         if current.rev == 0:  # we have not older snapshots
             self.snapshots.append(new)
@@ -90,7 +83,7 @@ class SnapshotContentMixin():
 
 
 class Mirror(SnapshotContentMixin):
-    constructor = '!mirror'
+    constructor = "!mirror"
     mirrors = {}
 
     def __init__(self, name):
@@ -98,19 +91,18 @@ class Mirror(SnapshotContentMixin):
         self.snapshots = []
 
     def __repr__(self):
-        return 'Mirror({self.name})'.format(self=self)
+        return "Mirror({self.name})".format(self=self)
 
     def link(self, app):
         self.aptly = app.aptly
         self.ui = app.ui
-        assert self.name in self.aptly.mirrors, 'Unknown mirror ' + self.name
+        assert self.name in self.aptly.mirrors, "Unknown mirror " + self.name
         self._extract_own_snapshots()
         return self
 
     def update(self, args):
         # 1. update mirror
-        self.ui.mirror_update(self,
-                              partial(self.aptly.mirror_update, self.name))
+        self.ui.mirror_update(self, partial(self.aptly.mirror_update, self.name))
         current, new = self._new_snapshot()
         self.aptly.snapshot_mirror(new.name, self.name)
         return self._snapshot_new(current, new)
@@ -123,18 +115,18 @@ class Mirror(SnapshotContentMixin):
 
 
 class Repo(SnapshotContentMixin):
-    constructor = '!repo'
+    constructor = "!repo"
     repos = {}
 
     def __init__(self, name):
         self.name = name
 
     def __repr__(self):
-        return 'Repo({self.name})'.format(self=self)
+        return "Repo({self.name})".format(self=self)
 
     def link(self, app):
         self.aptly = app.aptly
-        assert self.name in self.aptly.repos, f'Unknown repo {self.name}'
+        assert self.name in self.aptly.repos, f"Unknown repo {self.name}"
         self._extract_own_snapshots()
         return self
 
@@ -151,14 +143,14 @@ class Repo(SnapshotContentMixin):
 
 
 class FixSnapshot(SnapshotContentMixin):
-    constructor = '!snapshot'
+    constructor = "!snapshot"
     snapshots = {}
 
     def __init__(self, name):
         self.name = name
 
     def __repr__(self):
-        return f'Snapshot({self.name})'
+        return f"Snapshot({self.name})"
 
     def link(self, _app):
         return self
@@ -175,7 +167,7 @@ class FixSnapshot(SnapshotContentMixin):
 
 
 class Merge(SnapshotContentMixin):
-    constructor = '!merge'
+    constructor = "!merge"
 
     def __init__(self, name, sources, *, latest=True):
         self.name = name
@@ -195,21 +187,19 @@ class Merge(SnapshotContentMixin):
             yield from source.update_all(args)
 
     def __repr__(self):
-        return 'Merge({self.name}, {self.sources!r}, latest={self.latest})'.format(self=self)
+        return "Merge({self.name}, {self.sources!r}, latest={self.latest})".format(
+            self=self
+        )
 
     @property
     def current(self):
         c = super().current
         if c:
             return c
-        new = self.Snapshot(
-            f'{self.name}+r{1}',
-            1,
-            temporary=self.aptly
+        new = self.Snapshot(f"{self.name}+r{1}", 1, temporary=self.aptly)
+        self.aptly.snapshot_merge(
+            new.name, [s.current.name for s in self.sources], latest=self.latest
         )
-        self.aptly.snapshot_merge(new.name,
-                                  [s.current.name for s in self.sources],
-                                  latest=self.latest)
         return new
 
     def publication_candidate(self, published_snapshot):
@@ -231,8 +221,9 @@ class Merge(SnapshotContentMixin):
             if not diff:
                 merge.append(newest)
                 continue
-            answer = self.ui.update_snapshot(published, newest,
-                                             diff=diff, source=source)
+            answer = self.ui.update_snapshot(
+                published, newest, diff=diff, source=source
+            )
             if answer:
                 merge.append(answer)
             else:
@@ -243,30 +234,30 @@ class Merge(SnapshotContentMixin):
             if answer:
                 merge.append(answer)
         _, new = self._new_snapshot()
-        self.aptly.snapshot_merge(new.name, [s.name for s in merge],
-                                  latest=self.latest)
+        self.aptly.snapshot_merge(new.name, [s.name for s in merge], latest=self.latest)
         return new
 
 
-class Publish():
+class Publish:
     def __init__(self, target, distribution, config):
         self.target = target
         self.distribution = distribution
         self.architectures = []
-        self.alias = config.pop('alias')
-        self.origin = config.pop('origin', None)
+        self.alias = config.pop("alias")
+        self.origin = config.pop("origin", None)
 
-        if 'components' in config:
-            assert 'component' not in config, \
-                'component and components are mutive exclusiv'
-            assert 'source' not in config, \
-                'source is only for component (not for components)'
-            self.components = config.pop('components')
+        if "components" in config:
+            assert "component" not in config, (
+                "component and components are mutive exclusiv"
+            )
+            assert "source" not in config, (
+                "source is only for component (not for components)"
+            )
+            self.components = config.pop("components")
         else:
-            component = config.get('component', 'main')
-            assert 'source' in config, \
-                'source is required without components'
-            source = config.pop('source')
+            component = config.get("component", "main")
+            assert "source" in config, "source is required without components"
+            source = config.pop("source")
             if type(source) is list:
                 source = Merge(self.alias, source)
             self.components = {component: source}
@@ -300,10 +291,12 @@ class Publish():
                 return Diff(diff, publishedSnapshot, candidate)
             candidate.delete()
             return None
-        if self.ui.switch(diff,
-                          target=self.target,
-                          distribution=self.distribution,
-                          component=component):
+        if self.ui.switch(
+            diff,
+            target=self.target,
+            distribution=self.distribution,
+            component=component,
+        ):
             return Diff(diff, publishedSnapshot, candidate)
         else:
             candidate.delete()
@@ -311,7 +304,8 @@ class Publish():
 
     def _publish_initially(self):
         self.aptly.publish(
-            self.distribution, self.target,
+            self.distribution,
+            self.target,
             {c: s.current.name for c, s in self.components.items()},
             architectures=self.architectures,
             acquire_by_hash=True,
@@ -324,29 +318,30 @@ class Publish():
             return
 
         self.aptly.switch(self.distribution, self.target, wanted.new.name)
-        if re.match('.*\+r[0-9]+$', wanted.old):
+        if re.match(".*\+r[0-9]+$", wanted.old):
             self.aptly.snapshot_drop(wanted.old, check=False)
 
     def _publish_components(self, publishedSnapshots):
         switching_components = {}
         for component, snapshot in self.components.items():
-            wanted = self._define_switch(component,
-                                         publishedSnapshots[component])
+            wanted = self._define_switch(component, publishedSnapshots[component])
             if wanted:
                 switching_components[component] = wanted.new.name
 
         if switching_components:
-            self.aptly.switch_components(self.distribution, self.target,
-                                         switching_components)
+            self.aptly.switch_components(
+                self.distribution, self.target, switching_components
+            )
 
     def publish(self, args):
         p = self.aptly.publication(self.target, self.distribution)
         if p is None:  # first publication:
             return self._publish_initially()
-        currentSnapshots = {s['Component']: s['Name'] for s in p['Sources']}
-        assert set(currentSnapshots) == set(self.components), \
-            'aptly for now does not support changing the list of components' \
-            ': republish the repository!'
+        currentSnapshots = {s["Component"]: s["Name"] for s in p["Sources"]}
+        assert set(currentSnapshots) == set(self.components), (
+            "aptly for now does not support changing the list of components"
+            ": republish the repository!"
+        )
 
         if len(self.components) < 2:
             self._publish_component(*currentSnapshots.popitem())
