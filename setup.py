@@ -58,6 +58,7 @@ setup(
         'prompt_toolkit < 2.0',
         'pygments',
         'pyyaml',
+        'requests',
     ],
 
     scripts=['bin/reptly'],
