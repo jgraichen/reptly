@@ -16,6 +16,14 @@ The tool is to combine Reprepro's easy to use commands like update, with the fea
 * Easily downgrade specific updates or delay updates (one major update of a specific software)
 * Notifications (e.g. `cron`) to information about new available updates
 
+## Install
+
+Install current development snapshot:
+
+```console
+pipx install git+https://github.com/jgraichen/reptly.git
+```
+
 ## Example
 
 ```yaml
